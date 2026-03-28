@@ -1,0 +1,41 @@
+.app {
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Chat FAB */
+.chat-fab {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 22px;
+  background: linear-gradient(135deg, var(--accent-gold), #c9a84c);
+  color: #0a0d14;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border-radius: 100px;
+  box-shadow: 0 8px 32px rgba(232, 201, 126, 0.35), 0 2px 8px rgba(0,0,0,0.4);
+  z-index: 900;
+  transition: var(--transition);
+}
+
+.chat-fab:hover {
+  box-shadow: 0 12px 48px rgba(232, 201, 126, 0.5), 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.chat-fab__icon {
+  font-size: 1rem;
+}
+
+@media (max-width: 480px) {
+  .chat-fab {
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 18px;
+  }
+}
