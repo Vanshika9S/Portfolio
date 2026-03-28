@@ -5,6 +5,7 @@ import chatRoutes from './routes/chat.js'
 import projectRoutes from './routes/projects.js'
 import contactRoutes from './routes/contact.js'
 import skillRoutes from './routes/skills.js'
+import ideaRoutes from './routes/ideas.js'
 
 dotenv.config()
 
@@ -29,6 +30,7 @@ app.use('/api/chat', chatRoutes)
 app.use('/api/projects', projectRoutes)
 app.use('/api/skills', skillRoutes)
 app.use('/api/contact', contactRoutes)
+app.use('/api/ideas', ideaRoutes)
 
 // Health check
 app.get('/api/health', (_req, res) => {

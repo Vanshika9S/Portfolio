@@ -1,77 +1,81 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from '../hooks/useInView'
-import { getProjects } from '../services/api'
-import ProjectModal from './ProjectModal'
+import { getProjects, addProject, deleteProject } from '../services/api'
 import './Projects.css'
 
-const FALLBACK_PROJECTS = [
-  {
-    id: '1',
-    title: 'AI Chat Platform',
-    description: 'A real-time collaborative AI chat platform with rooms, history, and multi-model support.',
-    tech_stack: 'React, Node.js, Socket.io, OpenAI',
-    github_link: 'https://github.com',
-    demo_link: 'https://demo.example.com',
-    long_description: 'Built with React and Socket.io for real-time communication. Features include conversation rooms, message history, multiple AI model switching, and user authentication. Deployed on AWS with auto-scaling.',
-  },
-  {
-    id: '2',
-    title: 'E-Commerce Dashboard',
-    description: 'Full-stack admin dashboard with analytics, inventory management, and order tracking.',
-    tech_stack: 'Next.js, PostgreSQL, Prisma, TailwindCSS',
-    github_link: 'https://github.com',
-    demo_link: 'https://demo.example.com',
-    long_description: 'A production-ready admin dashboard featuring real-time sales analytics, inventory management, order processing, and customer insights. Includes dark/light mode and role-based access control.',
-  },
-  {
-    id: '3',
-    title: 'DevTrack',
-    description: 'Open-source issue tracker with kanban boards, GitHub integration, and team collaboration.',
-    tech_stack: 'React, Express, MongoDB, GitHub API',
-    github_link: 'https://github.com',
-    demo_link: 'https://demo.example.com',
-    long_description: 'A developer-focused issue tracker that integrates with GitHub repositories. Features kanban boards, sprint planning, team mention system, and automated workflow triggers.',
-  },
-  {
-    id: '4',
-    title: 'NeuroNote',
-    description: 'AI-powered note-taking app that auto-summarizes, tags, and connects related notes.',
-    tech_stack: 'React, Python, FastAPI, Supabase',
-    github_link: 'https://github.com',
-    demo_link: 'https://demo.example.com',
-    long_description: 'Smart notes powered by AI. Uses LLM embeddings to find semantic connections between notes, auto-generates summaries, suggests tags, and features a beautiful graph view of your knowledge.',
-  },
-  {
-    id: '5',
-    title: 'CloudDeploy CLI',
-    description: 'Zero-config deployment CLI tool that automates Docker + AWS ECS deployments.',
-    tech_stack: 'Node.js, Docker, AWS SDK, CLI',
-    github_link: 'https://github.com',
-    demo_link: 'https://demo.example.com',
-    long_description: 'A command-line tool that streamlines the entire deployment pipeline. Auto-detects project type, builds Docker images, pushes to ECR, and deploys to ECS with a single command.',
-  },
-  {
-    id: '6',
-    title: 'Pulse Analytics',
-    description: 'Privacy-first web analytics platform with beautiful dashboards and real-time reporting.',
-    tech_stack: 'SvelteKit, ClickHouse, Go, WebSockets',
-    github_link: 'https://github.com',
-    demo_link: 'https://demo.example.com',
-    long_description: 'A GDPR-compliant analytics platform that tracks user behavior without cookies. Features real-time dashboards, funnel analysis, heatmaps, and custom event tracking.',
-  },
+const TECH_OPTIONS = [
+  'React', 'Node.js', 'Python', 'C++', 'C', 'SQL', 'CSS',
+  'Express', 'MongoDB', 'PostgreSQL', 'Supabase', 'Git',
+  'HTML', 'JavaScript', 'TypeScript', 'Next.js', 'FastAPI',
+  'DSA', 'Machine Learning', 'AI', 'Firebase', 'REST API',
 ]
 
+
+const EMPTY_FORM = { title: '', description: '', tech_stack: [], github_link: '', demo_link: '', secret: '' }
 export default function Projects() {
-  const [projects, setProjects] = useState(FALLBACK_PROJECTS)
-  const [selected, setSelected] = useState(null)
+  const [projects, setProjects] = useState([])
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [form, setForm] = useState(EMPTY_FORM)
+  const [formStatus, setFormStatus] = useState('idle')
+  const [loading, setLoading] = useState(true)
   const [ref, inView] = useInView(0.1)
 
   useEffect(() => {
-    getProjects()
-      .then((data) => { if (data?.length) setProjects(data) })
-      .catch(() => {})
+    fetchProjects()
   }, [])
+
+  const fetchProjects = async () => {
+    setLoading(true)
+    try {
+      const data = await getProjects()
+      setProjects(data)
+    } catch {
+      setProjects([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleChange = (e) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
+  const toggleTech = (tech) => {
+    setForm((prev) => ({
+      ...prev,
+      tech_stack: prev.tech_stack.includes(tech)
+        ? prev.tech_stack.filter((t) => t !== tech)
+        : [...prev.tech_stack, tech],
+    }))
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!form.title.trim() || !form.description.trim()) return
+    setFormStatus('loading')
+    try {
+      const result = await addProject(form)
+      setProjects((prev) => [result.project, ...prev])
+      setForm(EMPTY_FORM)
+      setFormStatus('success')
+      setTimeout(() => { setFormStatus('idle'); setShowAddForm(false) }, 2000)
+    } catch {
+      setFormStatus('error')
+      setTimeout(() => setFormStatus('idle'), 2500)
+    }
+  }
+
+  const handleDelete = async (id, e) => {
+    e.stopPropagation()
+    if (!confirm('Delete this project?')) return
+    try {
+      await deleteProject(id)
+      setProjects((prev) => prev.filter((p) => p.id !== id))
+    } catch {
+      alert('Failed to delete')
+    }
+  }
 
   return (
     <section className="projects section" id="projects" ref={ref}>
@@ -83,78 +87,201 @@ export default function Projects() {
           transition={{ duration: 0.7 }}
         >
           <p className="section-label">Portfolio</p>
-          <h2 className="section-title">Featured Projects</h2>
-          <p className="section-subtitle">
-            A selection of things I've built — from developer tools to full-stack
-            applications.
-          </p>
+          <div className="projects__header-row">
+            <h2 className="section-title">My Projects</h2>
+            <motion.button
+              className="projects__add-btn"
+              onClick={() => setShowAddForm(!showAddForm)}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+            >
+              {showAddForm ? '✕ Cancel' : '+ Add Project'}
+            </motion.button>
+          </div>
+          <p className="section-subtitle">Things I've built — and am building.</p>
         </motion.div>
 
-        <div className="projects__grid">
-          {projects.map((project, i) => (
+        {/* Add Project Form */}
+        <AnimatePresence>
+          {showAddForm && (
             <motion.div
-              key={project.id}
-              className="project-card"
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              onClick={() => setSelected(project)}
-              whileHover={{ y: -4 }}
+              className="add-project-form"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.35 }}
             >
-              <div className="project-card__number">
-                {String(i + 1).padStart(2, '0')}
-              </div>
-              <h3 className="project-card__title">{project.title}</h3>
-              <p className="project-card__desc">{project.description}</p>
-
-              <div className="project-card__tags">
-                {project.tech_stack?.split(',').map((t) => (
-                  <span key={t.trim()} className="project-card__tag">
-                    {t.trim()}
-                  </span>
-                ))}
-              </div>
-
-              <div className="project-card__footer">
-                <button
-                  className="project-card__detail-btn"
-                  onClick={(e) => { e.stopPropagation(); setSelected(project) }}
-                >
-                  View Details →
-                </button>
-                <div className="project-card__links">
-                  <a
-                    href={project.github_link}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="project-card__link"
-                    onClick={(e) => e.stopPropagation()}
-                    title="GitHub"
-                  >
-                    <GithubIcon />
-                  </a>
-                  <a
-                    href={project.demo_link}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="project-card__link"
-                    onClick={(e) => e.stopPropagation()}
-                    title="Live Demo"
-                  >
-                    <ExternalIcon />
-                  </a>
+              <h3 className="add-project-form__title">➕ Add New Project</h3>
+              <form onSubmit={handleSubmit}>
+                <div className="add-project-form__row">
+                  <div className="add-project-form__field">
+                    <label>Title *</label>
+                    <input
+                      type="text"
+                      name="title"
+                      placeholder="My Awesome Project"
+                      value={form.title}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
+
+                <div className="add-project-form__field">
+                  <label>Description *</label>
+                  <textarea
+                    name="description"
+                    placeholder="What does this project do?"
+                    value={form.description}
+                    onChange={handleChange}
+                    rows={3}
+                    required
+                  />
+                </div>
+
+                <div className="add-project-form__field">
+                  <label>Tech Stack</label>
+                  <div className="tech-select">
+                    {TECH_OPTIONS.map((tech) => (
+                      <button
+                        type="button"
+                        key={tech}
+                        className={`tech-select__chip ${form.tech_stack.includes(tech) ? 'selected' : ''}`}
+                        onClick={() => toggleTech(tech)}
+                      >
+                        {tech}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="add-project-form__row">
+                  <div className="add-project-form__field">
+                    <label>GitHub Link</label>
+                    <input
+                      type="url"
+                      name="github_link"
+                      placeholder="https://github.com/..."
+                      value={form.github_link}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="add-project-form__field">
+                    <label>Demo Link</label>
+                    <input
+                      type="url"
+                      name="demo_link"
+                      placeholder="https://..."
+                      value={form.demo_link}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+                <div className="add-project-form__field">
+                    <label>Admin Key *</label>
+                    <input
+                      type="password"
+                      name="secret"
+                      placeholder="Enter your secret key"
+                      value={form.secret}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                {formStatus === 'success' && (
+                  <div className="form-msg form-msg--success">✓ Project added successfully!</div>
+                )}
+                {formStatus === 'error' && (
+                  <div className="form-msg form-msg--error">✕ Failed to add project. Try again.</div>
+                )}
+
+                <motion.button
+                  type="submit"
+                  className="add-project-form__submit"
+                  disabled={formStatus === 'loading'}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  {formStatus === 'loading' ? 'Adding...' : 'Add Project →'}
+                </motion.button>
+              </form>
             </motion.div>
-          ))}
-        </div>
+          )}
+        </AnimatePresence>
+
+        {/* Projects Grid */}
+        {loading ? (
+          <div className="projects__loading">
+            {[1,2,3].map((i) => <div key={i} className="project-skeleton" />)}
+          </div>
+        ) : projects.length === 0 ? (
+          <motion.div
+            className="projects__empty"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <span>🚀</span>
+            <p>No projects yet — add your first one above!</p>
+          </motion.div>
+        ) : (
+          <div className="projects__grid">
+            {projects.map((project, i) => (
+              <motion.div
+                key={project.id}
+                className="project-card"
+                initial={{ opacity: 0, y: 30 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: i * 0.08 }}
+                
+                whileHover={{ y: -4 }}
+              >
+                <div className="project-card__top">
+                  <div className="project-card__number">{String(i + 1).padStart(2, '0')}</div>
+                  <button
+                    className="project-card__delete"
+                    onClick={(e) => handleDelete(project.id, e)}
+                    title="Delete project"
+                  >
+                    🗑
+                  </button>
+                </div>
+
+                <h3 className="project-card__title">{project.title}</h3>
+                <p className="project-card__desc">{project.description}</p>
+
+                <div className="project-card__tags">
+                  {(Array.isArray(project.tech_stack)
+                    ? project.tech_stack
+                    : project.tech_stack?.split(',') || []
+                  ).map((t) => (
+                    <span key={t.trim()} className="project-card__tag">{t.trim()}</span>
+                  ))}
+                </div>
+
+                <div className="project-card__footer">
+                  
+                  <div className="project-card__links">
+                    {project.github_link && (
+                      <a href={project.github_link} target="_blank" rel="noreferrer"
+                        className="project-card__link" onClick={(e) => e.stopPropagation()} title="GitHub">
+                        <GithubIcon />
+                      </a>
+                    )}
+                    {project.demo_link && (
+                      <a href={project.demo_link} target="_blank" rel="noreferrer"
+                        className="project-card__link" onClick={(e) => e.stopPropagation()} title="Live Demo">
+                        <ExternalIcon />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
 
-      <AnimatePresence>
-        {selected && (
-          <ProjectModal project={selected} onClose={() => setSelected(null)} />
-        )}
-      </AnimatePresence>
+      
     </section>
   )
 }

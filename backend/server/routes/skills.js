@@ -4,14 +4,15 @@ import { supabase } from '../config/supabase.js'
 const router = Router()
 
 const FALLBACK = [
-  { id: '1', name: 'React', level: 90 },
-  { id: '2', name: 'Node.js', level: 85 },
-  { id: '3', name: 'TypeScript', level: 80 },
-  { id: '4', name: 'PostgreSQL', level: 75 },
-  { id: '5', name: 'Python', level: 78 },
-  { id: '6', name: 'Docker', level: 68 },
-  { id: '7', name: 'GraphQL', level: 72 },
-  { id: '8', name: 'AWS', level: 65 },
+  { id: '1',name: 'Python', level: 75 },
+  { id: '2',name: 'C++', level: 70 },
+  { id: '3',name: 'C', level: 72 },
+  { id: '4',name: 'DSA', level: 55 },
+  { id: '5',name: 'React', level: 65 },
+  { id: '6',name: 'Node.js', level: 60 },
+  { id: '7',name: 'SQL', level: 65 },
+  { id: '8',name: 'CSS', level: 70 },
+  { id: '9',name: 'Git / GitHub', level: 67 },
 ]
 
 router.get('/', async (_req, res) => {

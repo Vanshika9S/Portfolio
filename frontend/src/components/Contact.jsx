@@ -65,7 +65,7 @@ export default function Contact() {
               </div>
               <div className="contact__info-item">
                 <span className="contact__info-icon">💼</span>
-                <a href="https://linkedin.com/in/vanshika-shah-a52639314" target="_blank" rel="noreferrer" className="contact__info-link">
+                <a href="https://in.linkedin.com/in/vanshika-shah-a52639314" target="_blank" rel="noreferrer" className="contact__info-link">
                   linkedin.com/in/vanshika-shah-a52639314
                 </a>
               </div>
@@ -169,7 +169,7 @@ export default function Contact() {
             </span>
             <div className="footer__links">
               <a href="https://github.com/vanshika9s" target="_blank" rel="noreferrer">GitHub</a>
-              <a href="https://linkedin.com/in/vanshika-shah-a52639314" target="_blank" rel="noreferrer">LinkedIn</a>
+              <a href="https://in.linkedin.com/in/vanshika-shah-a52639314" target="_blank" rel="noreferrer">LinkedIn</a>
               <a href="https://twitter.com" target="_blank" rel="noreferrer">Twitter</a>
             </div>
           </div>

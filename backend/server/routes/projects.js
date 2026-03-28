@@ -3,61 +3,62 @@ import { supabase } from '../config/supabase.js'
 
 const router = Router()
 
-const FALLBACK = [
-  {
-    id: '1', title: 'AI Chat Platform',
-    description: 'A real-time collaborative AI chat platform with rooms, history, and multi-model support.',
-    tech_stack: 'React, Node.js, Socket.io, OpenAI',
-    github_link: 'https://github.com', demo_link: 'https://example.com',
-  },
-  {
-    id: '2', title: 'E-Commerce Dashboard',
-    description: 'Full-stack admin dashboard with analytics, inventory management, and order tracking.',
-    tech_stack: 'Next.js, PostgreSQL, Prisma, TailwindCSS',
-    github_link: 'https://github.com', demo_link: 'https://example.com',
-  },
-  {
-    id: '3', title: 'DevTrack',
-    description: 'Open-source issue tracker with kanban boards, GitHub integration, and team collaboration.',
-    tech_stack: 'React, Express, MongoDB, GitHub API',
-    github_link: 'https://github.com', demo_link: 'https://example.com',
-  },
-  {
-    id: '4', title: 'NeuroNote',
-    description: 'AI-powered note-taking app that auto-summarizes, tags, and connects related notes.',
-    tech_stack: 'React, Python, FastAPI, Supabase',
-    github_link: 'https://github.com', demo_link: 'https://example.com',
-  },
-  {
-    id: '5', title: 'CloudDeploy CLI',
-    description: 'Zero-config deployment CLI tool that automates Docker + AWS ECS deployments.',
-    tech_stack: 'Node.js, Docker, AWS SDK, CLI',
-    github_link: 'https://github.com', demo_link: 'https://example.com',
-  },
-  {
-    id: '6', title: 'Pulse Analytics',
-    description: 'Privacy-first web analytics platform with real-time dashboards and reporting.',
-    tech_stack: 'SvelteKit, ClickHouse, Go, WebSockets',
-    github_link: 'https://github.com', demo_link: 'https://example.com',
-  },
-]
-
+// GET all projects
 router.get('/', async (_req, res) => {
-  if (!supabase) {
-    return res.json(FALLBACK)
-  }
-
+  if (!supabase) return res.json([])
   try {
     const { data, error } = await supabase
       .from('projects')
       .select('*')
-      
-
+      .order('created_at', { ascending: false })
     if (error) throw error
-    res.json(data?.length ? data : FALLBACK)
+    res.json(data || [])
   } catch (err) {
-    console.error('[Projects] Supabase error:', err.message)
-    res.json(FALLBACK)
+    console.error('[Projects] GET error:', err.message)
+    res.status(500).json({ error: 'Failed to fetch projects' })
+  }
+})
+
+// POST add new project
+router.post('/', async (req, res) => {
+  const { title, description, tech_stack, github_link, demo_link, secret } = req.body
+
+  if (secret !== process.env.ADMIN_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+  if (!title?.trim() || !description?.trim()) {
+    return res.status(400).json({ error: 'Title and description are required' })
+  }
+  try {
+    const { data, error } = await supabase
+      .from('projects')
+      .insert([{
+        title: title.trim(),
+        description: description.trim(),
+        tech_stack: Array.isArray(tech_stack) ? tech_stack : [],
+        github_link: github_link?.trim() || '',
+        demo_link: demo_link?.trim() || '',
+      }])
+      .select()
+      .single()
+    if (error) throw error
+    res.json({ success: true, project: data })
+  } catch (err) {
+    console.error('[Projects] POST error:', err.message)
+    res.status(500).json({ error: 'Failed to add project' })
+  }
+})
+
+// DELETE project
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params
+  try {
+    const { error } = await supabase.from('projects').delete().eq('id', id)
+    if (error) throw error
+    res.json({ success: true })
+  } catch (err) {
+    console.error('[Projects] DELETE error:', err.message)
+    res.status(500).json({ error: 'Failed to delete project' })
   }
 })
 

@@ -11,10 +11,13 @@ const FALLBACK_PROJECTS = [
 const FALLBACK_SKILLS = [
   { name: 'Python', level: 75 },
   { name: 'C++', level: 70 },
+  { name: 'C', level: 72 },
+  { name: 'DSA', level: 55 },
   { name: 'React', level: 65 },
   { name: 'Node.js', level: 60 },
   { name: 'SQL', level: 65 },
-  { name: 'Git / GitHub', level: 72 },
+  { name: 'CSS', level: 70 },
+  { name: 'Git / GitHub', level: 67 },
 ]
 
 router.post('/', async (req, res) => {
@@ -47,7 +50,7 @@ Only answer based on the portfolio data below. If something isn't covered, say y
 === ABOUT VANSHIKA ===
 Name: Vanshika
 Role: CS Student (1st year)
-Education: B.Tech in Computer Science, Veermata Jijabai Technological Institute (VJTI), Mumbai (2024–2028)
+Education: B.Tech in Computer Science, Veermata Jijabai Technological Institute (VJTI), Mumbai (2024–2028) in second year college.
 Still learning and exploring — open to new technologies and opportunities.
 Hobbies: Binge-watching, learning new sports, playing with friends.
 

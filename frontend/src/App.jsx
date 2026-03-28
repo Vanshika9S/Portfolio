@@ -4,7 +4,9 @@ import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
 import Skills from './components/Skills'
+import Achievements from './components/Achievements'
 import Projects from './components/Projects'
+import ProjectIdeas from './components/ProjectIdeas'
 import Contact from './components/Contact'
 import Chatbot from './components/Chatbot'
 import './styles/app.css'
@@ -19,7 +21,9 @@ export default function App() {
         <Hero onChatOpen={() => setChatOpen(true)} />
         <About />
         <Skills />
+        <Achievements/>
         <Projects />
+        <ProjectIdeas />
         <Contact />
       </main>
 
