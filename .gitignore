@@ -4,3 +4,27 @@ dist/
 .DS_Store
 *.log
 .vite/
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables (NEVER commit these)
+.env
+.env.local
+.env.production
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Vite
+.vite/
+
+# Editor
+.vscode/

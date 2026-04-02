@@ -125,16 +125,7 @@ export default function Hero({ onChatOpen }) {
         </motion.div>
       </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        className="hero__scroll"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2 }}
-      >
-        <div className="hero__scroll-line" />
-        <span>scroll</span>
-      </motion.div>
+     
     </section>
   )
 }
