@@ -49,7 +49,7 @@ export default function About() {
               >
                 LinkedIn ↗
               </a>
-              <a href="/resume.pdf" className="about__link about__link--accent">
+              <a href="https://drive.google.com/file/d/1A5s2X_ThYcetayqbIUFTY2CQmi_xH4Sr/view?usp=sharing" className="about__link about__link--accent">
                 Resume ↗
               </a>
             </motion.div>
