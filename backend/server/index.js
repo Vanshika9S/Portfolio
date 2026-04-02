@@ -14,8 +14,13 @@ const PORT = process.env.PORT || 5000
 
 // Middleware
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
-  methods: ['GET', 'POST'],
+  origin: [
+    'http://localhost:5173',
+    'https://portfolio-eight-plum-96.vercel.app',
+    process.env.CLIENT_ORIGIN,
+  ].filter(Boolean),
+  methods: ['GET', 'POST', 'DELETE'],
+  credentials: true,
 }))
 app.use(express.json())
 
